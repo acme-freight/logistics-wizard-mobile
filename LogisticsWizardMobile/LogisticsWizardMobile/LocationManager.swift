@@ -69,11 +69,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     
     public func getLocationData(forCoordinates: CLLocationCoordinate2D, _ completion: @escaping (_ data: LocationData) -> Void) {
         let geocoder = CLGeocoder()
-        guard let lastLoggedLocation = lastLoggedLocation else {
-            completion(fakeLocationData())
-            return
-        }
-        geocoder.reverseGeocodeLocation(lastLoggedLocation) { placemarks, error in
+        geocoder.reverseGeocodeLocation(CLLocation(latitude: forCoordinates.latitude, longitude: forCoordinates.longitude)) { placemarks, error in
             DispatchQueue.main.async {
                 if let error = error {
                     print("Geocoding error: \(error.localizedDescription)")

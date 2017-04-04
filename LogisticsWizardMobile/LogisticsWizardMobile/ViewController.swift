@@ -108,6 +108,10 @@ class ViewController: UIViewController, LogisticsLocationManagerDelegate {
         }
         mapView.showsUserLocation = true
         mapView.showsCompass = false
+        
+        if UserDefaults.standard.bool(forKey: EnvVarConstantKeys.requiresGUID) == true {
+            performSegue(withIdentifier: "GUIDInputSegue", sender: nil)
+        }
     }
     
     @IBAction func registerTripButtonTapped() {
@@ -120,15 +124,20 @@ class ViewController: UIViewController, LogisticsLocationManagerDelegate {
         guard let location = locationManager.lastLoggedLocation else {
             return
         }
-        // let coordinates = CLLocationCoordinate2DMake(34.46, -120.04)
-        // uncomment when you want to fake location
         button.isEnabled = false
         UIView.animate(withDuration: 0.6) { 
             button.backgroundColor = "758196".hexColor
             button.setTitle("Registering trip...", for: .normal)
         }
         UIApplication.shared.isNetworkActivityIndicatorVisible = true
-        locationManager.getLocationData(forCoordinates: location.coordinate) { data in
+        var checkCoordinates = CLLocationCoordinate2D()
+        if UserDefaults.standard.bool(forKey: WebAPIConstantKeys.shouldUseDefaultLocation) == true {
+            checkCoordinates = CLLocationCoordinate2D(latitude: UserDefaults.standard.double(forKey: WebAPIConstantKeys.defaultLatitude),
+                                                      longitude: UserDefaults.standard.double(forKey: WebAPIConstantKeys.defaultLongitude))
+        } else {
+            checkCoordinates = location.coordinate
+        }
+        locationManager.getLocationData(forCoordinates: checkCoordinates) { data in
             let trip = Trip(locationData: data, coordinates: location.coordinate)
             WebAPI.register(trip, { shipmentID, errorReason in
                 self.handleRegistrationResponse(data, shipmentID, errorReason)
