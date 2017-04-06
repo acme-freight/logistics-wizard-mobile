@@ -74,7 +74,7 @@ fastlane/test_output
 Packages
 .build
 xcuserdata
-*.xcodeproj
+*.DS_Store
 
 ### SwiftPM ###
 
